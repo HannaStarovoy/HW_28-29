@@ -5,9 +5,11 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404, HttpRequest, HttpResponseForbidden
 from django.core.handlers.wsgi import WSGIRequest
+from django.views import View
 
 from .models import Note, User, Tag
 from .service import create_note, filter_notes, queryset_optimization
+from .history import HistoryPageNotes
 
 
 def home_page_view(request: HttpRequest):
@@ -52,6 +54,9 @@ def create_note_view(request: WSGIRequest):
 def show_note_view(request: WSGIRequest, note_uuid):
     try:
         note = Note.objects.get(uuid=note_uuid)  # Получение только ОДНОЙ записи.
+        history_service = HistoryPageNotes(request)
+        history_service.add_page(note)
+
 
     except Note.DoesNotExist:
         # Если не найдено такой записи.
@@ -187,4 +192,10 @@ def profile_view(request: WSGIRequest, username: str):
     tags_queryset = Tag.objects.filter(notes__user=user).distinct()
 
     return render(request, 'profile.html', {'tags': tags_queryset})
+
+class ListHistory(View):
+    def get(self, request: WSGIRequest):
+        history_service = HistoryPageNotes(request)
+        queryset = queryset_optimization(Note.objects.filter(uuid__in = history_service.history_uuids))
+        return render(request, "home.html", {"notes": queryset[:100]})
 

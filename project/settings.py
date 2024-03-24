@@ -101,6 +101,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     "PAGE_SIZE": 2,
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+
+        "rest_framework_simplejwt.authentication.JWTAuthentication",  # Для работы JWT.
+    ]
 }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

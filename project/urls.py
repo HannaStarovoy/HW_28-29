@@ -19,7 +19,10 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
 from posts import views
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView, TokenVerifyView
+)
 
 
 urlpatterns = [
@@ -36,11 +39,15 @@ urlpatterns = [
     path("delete/<note_uuid>", views.delete_note_view, name="delete-note"),
     path("user/<username>/notes", views.user_notes, name="user-notes"),
     path("profile/<username>", views.profile_view, name="profile-view"),
+    path('history', views.ListHistory.as_view(), name='show-history'),
 
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     path("__debug__/", include("debug_toolbar.urls")),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path("api/", include("posts.api.urls")),
-
+    # JWT
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
 ]
